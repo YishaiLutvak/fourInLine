@@ -55,11 +55,35 @@ def cpy(s1):
     
 def value(s):
 #Returns the heuristic value of s
-    if random.random()>0.1:
-        return random.random()*10
-    else:
-        return random.choice([LOSS,VICTORY,TIE])
-        
+    if find_horizontal(s) or find_vertical(s):
+        return VICTORY if s.playTurn == HUMAN else LOSS
+    if s.size == 0:
+        return TIE
+    return random.random() * 10
+
+
+def find_horizontal(s:game):
+    turn = {HUMAN:COMPUTER,COMPUTER:HUMAN}
+    return any(map(lambda i: max_len(s.board[i],turn[s.playTurn])>=4,range(rows)))
+
+def find_vertical(s):
+    turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
+    vertical_func = lambda i: map(lambda x:x[i],s.board)
+    return any(map(lambda i: max_len(vertical_func(i),turn[s.playTurn])>=4,range(columns)))
+
+def max_len(_list,num):
+    count = 0
+    max_count = 0
+    for item in _list:
+        if item != num:
+            count = 0
+        else:
+            count+=1
+        max_count = max(count,max_count)
+    return max_count
+
+
+
 
 def printState(s):
 #Prints the board. The empty cells are printed as numbers = the cells name(for input)
