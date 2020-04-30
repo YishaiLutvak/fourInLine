@@ -60,64 +60,74 @@ def value(s):
         return VICTORY if s.playTurn == HUMAN else LOSS
     if s.size == 0:
         return TIE
-    return random.random() * 10
+    return totalEvaluate(s)*10 + 10
 
 
-def find_horizontal(s: game):
+def find_horizontal(s):
     turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
     return any(map(lambda i: max_len(s.board[i], turn[s.playTurn]) >= 4, range(rows)))
 
+def vertical_func(s):
+    verticals = []
+    for i in range(columns):
+        verti = []
+        for item in s.board:
+            verti+=[item[i]]
+        verticals += [verti]
+    print(verticals)
+    return verticals
 
 def find_vertical(s):
     turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
-    vertical_func = lambda i: map(lambda x: x[i], s.board)
-    return any(map(lambda i: max_len(vertical_func(i), turn[s.playTurn]) >= 4, range(columns)))
-
+    #vertical_func = lambda i: map(lambda x: x[i], s.board)
+    listVerticals = vertical_func(s)
+    return any(map(lambda i: max_len(listVerticals[i], turn[s.playTurn]) >= 4, range(columns)))
 
 def hypotenuse1_func(s):
     column = 0
     row = rows - 4
     hypotenuses1 = []
-    hypo = []
     for i in range(rows + columns - 2 * 3 - 1):
+        hypo = []
         step = 0
         while row + step < rows and column + step < columns:
             hypo = hypo + [s.board[row + step][column + step]]
             step += 1
         hypotenuses1 += [hypo]
-        hypo.clear
         if row != 0:
             row -= 1
         else:
             column += 1
+    print(hypotenuses1)
     return hypotenuses1
+
+def find_hypotenuse1(s):
+    turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
+    listHypotenuse1 = hypotenuse1_func(s)
+    return any(map(lambda i: max_len(listHypotenuse1[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
 
 def hypotenuse2_func(s):
     column = 3
     row = 0
     hypotenuses2 = []
-    hypo = []
     for i in range(rows + columns - 2 * 3 - 1):
+        hypo = []
         step = 0
-        while row + step < rows and column - step > 0:
+        while row + step < rows and column - step >= 0:
             hypo = hypo + [s.board[row + step][column - step]]
             step += 1
         hypotenuses2 += [hypo]
-        hypo.clear
         if column != columns-1:
             column += 1
         else:
             row += 1
+    print(hypotenuses2)
     return hypotenuses2
-
-
-def find_hypotenuse1(s):
-    turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
-    return any(map(lambda i: max_len(hypotenuse1_func(s)[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
 
 def find_hypotenuse2(s):
     turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
-    return any(map(lambda i: max_len(hypotenuse2_func(s)[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
+    listHypotenuse2 = hypotenuse2_func(s)
+    return any(map(lambda i: max_len(listHypotenuse2[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
 
 
 def max_len(_list, num):
@@ -131,6 +141,39 @@ def max_len(_list, num):
         max_count = max(count, max_count)
     return max_count
 
+
+def totalEvaluate(s):
+    def evaluate(_list):
+        countActive = 0
+        countPotential = 0
+        for item in _list:
+            if item == 0:
+                countPotential += 1
+                if countPotential > 4:
+                    countPotential += 2
+            if item == 1:
+                countPotential += 1
+                countActive += 1
+                if countPotential > 4:
+                    countPotential += 2
+            else:
+                if countPotential < 4:
+                    countPotential = 0
+                    countActive = 0
+                else:
+                   return countActive+countPotential
+            if countPotential <4:
+                return 0
+            return countActive+countPotential
+    totalEval = 0
+    listVerticals = vertical_func(s)
+    listHypotenuse1 = hypotenuse1_func(s)
+    listHypotenuse2 = hypotenuse2_func(s)
+    lists = [s.board,listVerticals,listHypotenuse1,listHypotenuse2]
+    for list in lists:
+       for item in list:
+           totalEval += evaluate(item)
+    return totalEval
 
 def printState(s):
     # Prints the board. The empty cells are printed as numbers = the cells name(for input)
