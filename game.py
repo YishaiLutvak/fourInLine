@@ -60,7 +60,7 @@ def value(s):
         return VICTORY if s.playTurn == HUMAN else LOSS
     if s.size == 0:
         return TIE
-    return totalEvaluate(s)*10 + 10
+    return 0.00001 + totalEvaluate(s,1) - totalEvaluate(s,5)
 
 
 def find_horizontal(s):
@@ -142,29 +142,30 @@ def max_len(_list, num):
     return max_count
 
 
-def totalEvaluate(s):
+def totalEvaluate(s, num):
     def evaluate(_list):
-        countActive = 0
-        countPotential = 0
+        def translator(_count0,_countNum):
+            if _countNum == 3 and _count0+_countNum>4:
+                return 10**10
+            return 10**_countNum
+
+        count0 = 0
+        countNum = 0
         for item in _list:
             if item == 0:
-                countPotential += 1
-                if countPotential > 4:
-                    countPotential += 2
-            if item == 1:
-                countPotential += 1
-                countActive += 1
-                if countPotential > 4:
-                    countPotential += 2
+                count0 += 1
+            if item == num:
+                countNum += 1
             else:
-                if countPotential < 4:
-                    countPotential = 0
-                    countActive = 0
+                if countNum+count0 < 4:
+                    count0 = 0
+                    countNum = 0
                 else:
-                   return countActive+countPotential
-            if countPotential <4:
-                return 0
-            return countActive+countPotential
+                    return translator(count0,countNum)
+        if countNum+count0 < 4:
+            return 0
+        return translator(count0,countNum)
+
     totalEval = 0
     listVerticals = vertical_func(s)
     listHypotenuse1 = hypotenuse1_func(s)
