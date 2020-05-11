@@ -62,14 +62,10 @@ def value(s):
         return VICTORY if s.playTurn == HUMAN else LOSS
     if s.size == 0:
         return TIE
-    # print("checking")
     # print(s.board)
-    # # print(random.random() *10)
-    # # return random.random() *10
     # print(f"HUMAN value: {totalEvaluate(s,HUMAN)}")
     # print(f"COMPUTER value: {totalEvaluate(s,COMPUTER)}")
-    # print (0.00001 + totalEvaluate(s,COMPUTER) - totalEvaluate(s,HUMAN))
-
+    # print (f"COMPUTER LESS HUMAN value: {0.00001 + totalEvaluate(s,COMPUTER) - totalEvaluate(s,HUMAN)}")
     return 0.00001 + totalEvaluate(s,COMPUTER) - totalEvaluate(s,HUMAN)
 
 
@@ -87,7 +83,6 @@ def vertical_func(s):
     return verticals
 
 def find_vertical(s):
-    turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
     #vertical_func = lambda i: map(lambda x: x[i], s.board)
     listVerticals = vertical_func(s)
     return any(map(lambda i: max_len(listVerticals[i], turn[s.playTurn]) >= 4, range(columns)))
@@ -111,7 +106,6 @@ def hypotenuse1_func(s):
     return hypotenuses1
 
 def find_hypotenuse1(s):
-    turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
     listHypotenuse1 = hypotenuse1_func(s)
     return any(map(lambda i: max_len(listHypotenuse1[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
 
@@ -134,7 +128,6 @@ def hypotenuse2_func(s):
     return hypotenuses2
 
 def find_hypotenuse2(s):
-    turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
     listHypotenuse2 = hypotenuse2_func(s)
     return any(map(lambda i: max_len(listHypotenuse2[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
 
@@ -149,42 +142,6 @@ def max_len(_list, num):
             count += 1
         max_count = max(count, max_count)
     return max_count
-
-
-# def totalEvaluate(s, num):
-#     def evaluate(_list):
-#         def translator(_count0,_countNum):
-#             if _countNum == 3 and _count0 + _countNum > 4:
-#                 return 10**10
-#             return 10**_countNum
-#
-#         count0 = 0
-#         countNum = 0
-#         for item in _list:
-#             if item == 0:
-#                 count0 += 1
-#             if item == num:
-#                 countNum += 1
-#             else:
-#                 if countNum+count0 < 4:
-#                     count0 = 0
-#                     countNum = 0
-#                 else:
-#                     return translator(count0,countNum)
-#         if countNum+count0 < 4:
-#             return 0
-#         return translator(count0,countNum)
-#
-#     totalEval = 0
-#     listVerticals = vertical_func(s)
-#     listHypotenuse1 = hypotenuse1_func(s)
-#     listHypotenuse2 = hypotenuse2_func(s)
-#     lists = [s.board,listVerticals,listHypotenuse1,listHypotenuse2]
-#     for list in lists:
-#        for item in list:
-#            totalEval += evaluate(item)
-#     return totalEval
-
 
 def totalEvaluate(s, actor):
     def evaluate(_list, actor):
