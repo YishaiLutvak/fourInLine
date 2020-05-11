@@ -1,5 +1,6 @@
 import copy
 import alphaBetaPruning
+from os import system
 import random
 
 VICTORY = 10 ** 20  # The value of a winning board (for max)
@@ -9,6 +10,8 @@ SIZE = 4  # the length of winning seq.
 COMPUTER = SIZE + 1  # Marks the computer's cells on the board
 HUMAN = 1  # Marks the human's cells on the board
 
+turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
+
 rows = 6
 columns = 7
 
@@ -17,7 +20,6 @@ class game:
     board = []
     size = rows * columns
     playTurn = HUMAN
-
     # Used by alpha-beta pruning to allow pruning
 
     '''
@@ -50,7 +52,7 @@ def cpy(s1):
     s2.playTurn = s1.playTurn
     s2.size = s1.size
     s2.board = copy.deepcopy(s1.board)
-    print("board ", s2.board)
+    # print("board ", s2.board)
     return s2
 
 
@@ -60,11 +62,18 @@ def value(s):
         return VICTORY if s.playTurn == HUMAN else LOSS
     if s.size == 0:
         return TIE
-    return 0.00001 + totalEvaluate(s,1) - totalEvaluate(s,5)
+    # print("checking")
+    # print(s.board)
+    # # print(random.random() *10)
+    # # return random.random() *10
+    # print(f"HUMAN value: {totalEvaluate(s,HUMAN)}")
+    # print(f"COMPUTER value: {totalEvaluate(s,COMPUTER)}")
+    # print (0.00001 + totalEvaluate(s,COMPUTER) - totalEvaluate(s,HUMAN))
+
+    return 0.00001 + totalEvaluate(s,COMPUTER) - totalEvaluate(s,HUMAN)
 
 
 def find_horizontal(s):
-    turn = {HUMAN: COMPUTER, COMPUTER: HUMAN}
     return any(map(lambda i: max_len(s.board[i], turn[s.playTurn]) >= 4, range(rows)))
 
 def vertical_func(s):
@@ -74,7 +83,7 @@ def vertical_func(s):
         for item in s.board:
             verti+=[item[i]]
         verticals += [verti]
-    print(verticals)
+    #print(verticals)
     return verticals
 
 def find_vertical(s):
@@ -98,7 +107,7 @@ def hypotenuse1_func(s):
             row -= 1
         else:
             column += 1
-    print(hypotenuses1)
+    #print(hypotenuses1)
     return hypotenuses1
 
 def find_hypotenuse1(s):
@@ -121,7 +130,7 @@ def hypotenuse2_func(s):
             column += 1
         else:
             row += 1
-    print(hypotenuses2)
+    #print(hypotenuses2)
     return hypotenuses2
 
 def find_hypotenuse2(s):
@@ -142,30 +151,57 @@ def max_len(_list, num):
     return max_count
 
 
-def totalEvaluate(s, num):
-    def evaluate(_list):
-        def translator(_count0,_countNum):
-            if _countNum == 3 and _count0+_countNum>4:
-                return 10**10
-            return 10**_countNum
+# def totalEvaluate(s, num):
+#     def evaluate(_list):
+#         def translator(_count0,_countNum):
+#             if _countNum == 3 and _count0 + _countNum > 4:
+#                 return 10**10
+#             return 10**_countNum
+#
+#         count0 = 0
+#         countNum = 0
+#         for item in _list:
+#             if item == 0:
+#                 count0 += 1
+#             if item == num:
+#                 countNum += 1
+#             else:
+#                 if countNum+count0 < 4:
+#                     count0 = 0
+#                     countNum = 0
+#                 else:
+#                     return translator(count0,countNum)
+#         if countNum+count0 < 4:
+#             return 0
+#         return translator(count0,countNum)
+#
+#     totalEval = 0
+#     listVerticals = vertical_func(s)
+#     listHypotenuse1 = hypotenuse1_func(s)
+#     listHypotenuse2 = hypotenuse2_func(s)
+#     lists = [s.board,listVerticals,listHypotenuse1,listHypotenuse2]
+#     for list in lists:
+#        for item in list:
+#            totalEval += evaluate(item)
+#     return totalEval
 
-        count0 = 0
-        countNum = 0
+
+def totalEvaluate(s, actor):
+    def evaluate(_list, actor):
+        counter = 0
         for item in _list:
-            if item == 0:
-                count0 += 1
-            if item == num:
-                countNum += 1
-            else:
-                if countNum+count0 < 4:
-                    count0 = 0
-                    countNum = 0
+            if item != 0 and item != actor:
+                if counter < 4:
+                    counter = 0
                 else:
-                    return translator(count0,countNum)
-        if countNum+count0 < 4:
-            return 0
-        return translator(count0,countNum)
-
+                    break
+            else:
+                counter += 1
+        if counter > 3:
+            potential = counter - 3
+        else:
+            potential = 0
+        return potential
     totalEval = 0
     listVerticals = vertical_func(s)
     listHypotenuse1 = hypotenuse1_func(s)
@@ -173,15 +209,16 @@ def totalEvaluate(s, num):
     lists = [s.board,listVerticals,listHypotenuse1,listHypotenuse2]
     for list in lists:
        for item in list:
-           totalEval += evaluate(item)
+           totalEval += evaluate(item, actor)
     return totalEval
 
 def printState(s):
+    system("cls")
     # Prints the board. The empty cells are printed as numbers = the cells name(for input)
     # If the game ended prints who won.
     for r in range(rows):
         print("\n|", end="")
-        # print("\n",len(s[0][0])*" --","\n|",sep="", end="")
+       # print("\n",len(s[0][0])*" --","\n|",sep="", end="")
         for c in range(columns):
             if s.board[r][c] == COMPUTER:
                 print("X|", end="")
@@ -231,7 +268,6 @@ def makeMove(s, c):
     # Puts mark (for huma. or comp.) in col. c
     # and switches turns.
     # Assumes the move is legal.
-
     r = 0
     while r < rows and s.board[r][c] == 0:
         r += 1
@@ -263,15 +299,15 @@ def getNext(s):
     # returns a list of the next states of s
     ns = []
     for c in list(range(columns)):
-        print("c=", c)
+        #print("c=", c)
         if s.board[0][c] == 0:
-            print("possible move ", c)
+            #print("possible move ", c)
             tmp = cpy(s)
             makeMove(tmp, c)
-            print("tmp board=", tmp.board)
+            #print("tmp board=", tmp.board)
             ns += [tmp]
-            print("ns=", ns)
-    print("returns ns ", ns)
+            #print("ns=", ns)
+    #print("returns ns ", ns)
     return ns
 
 

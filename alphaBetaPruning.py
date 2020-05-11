@@ -1,19 +1,19 @@
 import game
 
-DEPTH = 2
+DEPTH = 4
 
 
 def go(gm):
-    print("In go of game ", gm.board)
+    # print("In go of game ", gm.board)
     if game.isHumTurn(gm):
-        print("Turn of human")
-        obj = abmin(gm, DEPTH, game.LOSS - 1, game.VICTORY + 1)[1]
-        print("object board: ", obj.board)
+        # print("Turn of human")
+        obj = abmin(gm, DEPTH, game.LOSS - 1, game.VICTORY + 1)
+        # print("object board: ", obj[1].board)
         return obj
     else:
-        print("Turn of agent")
-        obj = abmax(gm, DEPTH, game.LOSS - 1, game.VICTORY + 1)[1]
-        print("object board: ", obj.board)
+        # print("Turn of agent")
+        obj = abmax(gm, DEPTH, game.LOSS - 1, game.VICTORY + 1)
+        #print("object board: ", obj[1].board)
         return obj
 
 
@@ -23,16 +23,16 @@ def go(gm):
 # returns [v, ns]: v = state s's value. ns = the state after recomended move.
 #        if s is a terminal state ns=0.
 def abmax(gm, d, a, b):
-    print("now calculate abmax")
-    print("d=", d)
-    print("alpha=", a)
-    print("beta=", b)
+    # print("now calculate abmax")
+    # print("d=", d)
+    # print("alpha=", a)
+    # print("beta=", b)
     if d == 0 or game.isFinished(gm):
-        print("returns ", [game.value(gm), gm])
+        # print("returns ", [game.value(gm), gm])
         return [game.value(gm), gm]
     v = float("-inf")
     ns = game.getNext(gm)
-    print("next moves:", len(ns), " possible moves ")
+    # print("next moves:", len(ns), " possible moves ")
     bestMove = 0
     for st in ns:
         tmp = abmin(st, d - 1, a, b)
@@ -52,18 +52,18 @@ def abmax(gm, d, a, b):
 # returns [v, ns]: v = state s's value. ns = the state after recomended move.
 #        if s is a terminal state ns=0.
 def abmin(gm, d, a, b):
-    print("now calculate abmin")
-    print("d=", d)
-    print("a=", a)
-    print("b=", b)
+    # print("now calculate abmin")
+    # print("d=", d)
+    # print("a=", a)
+    # print("b=", b)
 
     if d == 0 or game.isFinished(gm):
-        print("returns ", [game.value(gm), gm])
+        # print("returns ", [game.value(gm), gm])
         return [game.value(gm), 0]
     v = float("inf")
 
     ns = game.getNext(gm)
-    print("next moves:", len(ns), " possible moves ")
+    # print("next moves:", len(ns), " possible moves ")
     bestMove = 0
     for st in ns:
         tmp = abmax(st, d - 1, a, b)
