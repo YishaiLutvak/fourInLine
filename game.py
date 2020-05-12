@@ -146,19 +146,22 @@ def max_len(_list, num):
 def totalEvaluate(s, actor):
     def evaluate(_list, actor):
         counter = 0
+        negative = 0
         for item in _list:
             if item != 0 and item != actor:
                 if counter < 4:
+                    negative += counter
                     counter = 0
-                else:
-                    break
+                #else:
+                #    break
             else:
                 counter += 1
         if counter > 3:
             potential = counter - 3
         else:
+            negative += counter
             potential = 0
-        return potential
+        return potential - negative
     totalEval = 0
     listVerticals = vertical_func(s)
     listHypotenuse1 = hypotenuse1_func(s)
