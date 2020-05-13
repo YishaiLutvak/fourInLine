@@ -66,26 +66,29 @@ def value(s):
     # print(f"HUMAN value: {totalEvaluate(s,HUMAN)}")
     # print(f"COMPUTER value: {totalEvaluate(s,COMPUTER)}")
     # print (f"COMPUTER LESS HUMAN value: {0.00001 + totalEvaluate(s,COMPUTER) - totalEvaluate(s,HUMAN)}")
-    return 0.00001 + totalEvaluate(s,COMPUTER) - totalEvaluate(s,HUMAN)
+    return 0.00001 + totalEvaluate(s, COMPUTER) - totalEvaluate(s, HUMAN)
 
 
 def find_horizontal(s):
     return any(map(lambda i: max_len(s.board[i], turn[s.playTurn]) >= 4, range(rows)))
+
 
 def vertical_func(s):
     verticals = []
     for i in range(columns):
         verti = []
         for item in s.board:
-            verti+=[item[i]]
+            verti += [item[i]]
         verticals += [verti]
-    #print(verticals)
+    # print(verticals)
     return verticals
 
+
 def find_vertical(s):
-    #vertical_func = lambda i: map(lambda x: x[i], s.board)
+    # vertical_func = lambda i: map(lambda x: x[i], s.board)
     listVerticals = vertical_func(s)
     return any(map(lambda i: max_len(listVerticals[i], turn[s.playTurn]) >= 4, range(columns)))
+
 
 def hypotenuse1_func(s):
     column = 0
@@ -102,12 +105,14 @@ def hypotenuse1_func(s):
             row -= 1
         else:
             column += 1
-    #print(hypotenuses1)
+    # print(hypotenuses1)
     return hypotenuses1
+
 
 def find_hypotenuse1(s):
     listHypotenuse1 = hypotenuse1_func(s)
     return any(map(lambda i: max_len(listHypotenuse1[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
+
 
 def hypotenuse2_func(s):
     column = 3
@@ -120,12 +125,13 @@ def hypotenuse2_func(s):
             hypo = hypo + [s.board[row + step][column - step]]
             step += 1
         hypotenuses2 += [hypo]
-        if column != columns-1:
+        if column != columns - 1:
             column += 1
         else:
             row += 1
-    #print(hypotenuses2)
+    # print(hypotenuses2)
     return hypotenuses2
+
 
 def find_hypotenuse2(s):
     listHypotenuse2 = hypotenuse2_func(s)
@@ -143,43 +149,88 @@ def max_len(_list, num):
         max_count = max(count, max_count)
     return max_count
 
+
 def totalEvaluate(s, actor):
     def evaluate(_list, actor):
-        valueOfSequenceThree = 5
-        sequenceThree = 0
-        sequence = 0
+
+        # Parameters for potential
         counter = 0
+
+        # Parameters for a sequence of three
+        valueOfSequenceThree = 16
+        sequenceThree = 0
+        continuousSequence = 0
+        sequence = 0
+
+        # Temporary parameters
+        flagOneJamp = 0
+        flagLast0AfterSequence = 0
+
         for item in _list:
+            # Case 1 - The other player's place
             if item != 0 and item != actor:
+                flagLast0AfterSequence == 0
                 if counter < 4:
                     counter = 0
                     sequence = 0
+                    continuousSequence = 0
+                # No more chances for four places
                 else:
                     break
+
+            # Case 2 - The player's place
+            elif item == actor:
+                flagLast0AfterSequence == 0
+                counter += 1
+                sequence += 1
+                continuousSequence += 1
+
+            # Case 3 - Empty place
             else:
                 counter += 1
-                if item == actor:
-                    sequence += 1
-                else:
-                    if sequence == 3:
-                        sequenceThree = 1
+                # Two empty spaces interrupt a sequence|X| | |X|
+                if flagLast0AfterSequence == 1:
                     sequence = 0
+                    flagLast0AfterSequence = 0
+                    flagOneJamp = 0
+                # The sequence is continuous
+                elif continuousSequence == 3:
+                    sequenceThree = 2 if counter > 4 else 1  # |X|X|X| | = 1, | |X|X|X| | = 2
+                    sequence = 0
+                    flagOneJamp = 0
+                # The sequence of three is not continuous |X| |X|X|
+                elif sequence >= 3:
+                    sequenceThree = 1
+                    sequence = 0
+                    flagOneJamp = 0
+                # The sequence is less than three
+                elif sequence > 0:
+                    flagLast0AfterSequence = 1
+                    if flagOneJamp == 0:  # for example | |X|X| |
+                        flagOneJamp = 1
+                    # The sequence is not continuous |X| |X| |
+                    else:
+                        sequence = continuousSequence
+                continuousSequence = 0
+
         if counter > 3:
             potential = counter - 3
-            if sequence == 3:
+            if sequence > 3:
                 sequenceThree = 1
         else:
             potential = 0
-        return potential + sequenceThree*valueOfSequenceThree
+        return potential + sequenceThree * valueOfSequenceThree
+
     totalEval = 0
     listVerticals = vertical_func(s)
     listHypotenuse1 = hypotenuse1_func(s)
     listHypotenuse2 = hypotenuse2_func(s)
-    lists = [s.board,listVerticals,listHypotenuse1,listHypotenuse2]
+    lists = [s.board, listVerticals, listHypotenuse1, listHypotenuse2]
     for list in lists:
-       for item in list:
-           totalEval += evaluate(item, actor)
+        for item in list:
+            totalEval += evaluate(item, actor)
     return totalEval
+
 
 def printState(s):
     system("cls")
@@ -187,7 +238,7 @@ def printState(s):
     # If the game ended prints who won.
     for r in range(rows):
         print("\n|", end="")
-       # print("\n",len(s[0][0])*" --","\n|",sep="", end="")
+        # print("\n",len(s[0][0])*" --","\n|",sep="", end="")
         for c in range(columns):
             if s.board[r][c] == COMPUTER:
                 print("X|", end="")
@@ -268,15 +319,15 @@ def getNext(s):
     # returns a list of the next states of s
     ns = []
     for c in list(range(columns)):
-        #print("c=", c)
+        # print("c=", c)
         if s.board[0][c] == 0:
-            #print("possible move ", c)
+            # print("possible move ", c)
             tmp = cpy(s)
             makeMove(tmp, c)
-            #print("tmp board=", tmp.board)
+            # print("tmp board=", tmp.board)
             ns += [tmp]
-            #print("ns=", ns)
-    #print("returns ns ", ns)
+            # print("ns=", ns)
+    # print("returns ns ", ns)
     return ns
 
 

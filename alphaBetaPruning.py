@@ -1,6 +1,6 @@
 import game
 
-DEPTH = 5
+DEPTH = 2
 
 def go(gm):
     # print("In go of game ", gm.board)
