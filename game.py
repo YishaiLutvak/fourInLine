@@ -145,23 +145,32 @@ def max_len(_list, num):
 
 def totalEvaluate(s, actor):
     def evaluate(_list, actor):
+        valueOfSequenceThree = 5
+        sequenceThree = 0
+        sequence = 0
         counter = 0
-        negative = 0
         for item in _list:
             if item != 0 and item != actor:
                 if counter < 4:
-                    negative += counter
                     counter = 0
-                #else:
-                #    break
+                    sequence = 0
+                else:
+                    break
             else:
                 counter += 1
+                if item == actor:
+                    sequence += 1
+                else:
+                    if sequence == 3:
+                        sequenceThree = 1
+                    sequence = 0
         if counter > 3:
             potential = counter - 3
+            if sequence == 3:
+                sequenceThree = 1
         else:
-            negative += counter
             potential = 0
-        return potential - negative
+        return potential + sequenceThree*valueOfSequenceThree
     totalEval = 0
     listVerticals = vertical_func(s)
     listHypotenuse1 = hypotenuse1_func(s)
