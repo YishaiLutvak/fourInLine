@@ -55,24 +55,34 @@ def cpy(s1):
     # print("board ", s2.board)
     return s2
 
+# Yishai Lutvak 304909864
+# Notice that I left the depth of tree 2,
+# and yet the heuristics make the computer play really well
 
+# Returns the heuristic value of s
+# The totalEvaluate function will have documentation that explains the heuristics
 def value(s):
-    # Returns the heuristic value of s
+    # Checks whether there is a win or a loss
     if find_horizontal(s) or find_vertical(s) or find_hypotenuse1(s) or find_hypotenuse2(s):
         return VICTORY if s.playTurn == HUMAN else LOSS
+
+    # Checks whether the result is a draw - if the board is full
     if s.size == 0:
         return TIE
+
     # print(s.board)
     # print(f"HUMAN value: {totalEvaluate(s,HUMAN)}")
     # print(f"COMPUTER value: {totalEvaluate(s,COMPUTER)}")
     # print (f"COMPUTER LESS HUMAN value: {0.00001 + totalEvaluate(s,COMPUTER) - totalEvaluate(s,HUMAN)}")
+
+    # Returns the board value result to the player less the board value to the other player
     return 0.00001 + totalEvaluate(s, COMPUTER) - totalEvaluate(s, HUMAN)
 
-
+# Checks if there is a sequence of four in any row
 def find_horizontal(s):
     return any(map(lambda i: max_len(s.board[i], turn[s.playTurn]) >= 4, range(rows)))
 
-
+# Builds a list of the columns when each column is a list
 def vertical_func(s):
     verticals = []
     for i in range(columns):
@@ -83,13 +93,13 @@ def vertical_func(s):
     # print(verticals)
     return verticals
 
-
+# Checks if there is a sequence of four in any column
 def find_vertical(s):
     # vertical_func = lambda i: map(lambda x: x[i], s.board)
     listVerticals = vertical_func(s)
     return any(map(lambda i: max_len(listVerticals[i], turn[s.playTurn]) >= 4, range(columns)))
 
-
+# Builds a list of the diagonals from top and left to bottom and right
 def hypotenuse1_func(s):
     column = 0
     row = rows - 4
@@ -108,12 +118,12 @@ def hypotenuse1_func(s):
     # print(hypotenuses1)
     return hypotenuses1
 
-
+# Checks if there is a sequence of four in any diagonal from top and left to bottom and right
 def find_hypotenuse1(s):
     listHypotenuse1 = hypotenuse1_func(s)
     return any(map(lambda i: max_len(listHypotenuse1[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
 
-
+# Builds a list of the diagonals from top and right to bottom and left
 def hypotenuse2_func(s):
     column = 3
     row = 0
@@ -132,12 +142,12 @@ def hypotenuse2_func(s):
     # print(hypotenuses2)
     return hypotenuses2
 
-
+# Checks if there is a sequence of four in any diagonal from top and right to bottom and left
 def find_hypotenuse2(s):
     listHypotenuse2 = hypotenuse2_func(s)
     return any(map(lambda i: max_len(listHypotenuse2[i], turn[s.playTurn]) >= 4, range(rows + columns - 2 * 3 - 1)))
 
-
+# Auxiliary function for calculating maximum sequence in a list
 def max_len(_list, num):
     count = 0
     max_count = 0
@@ -149,8 +159,17 @@ def max_len(_list, num):
         max_count = max(count, max_count)
     return max_count
 
-
+# Heuristics combine two different heuristics
+# 1. Calculation of how many possibilities remain on the board for player to create sequence four
+# As the game begins, there are 69 options to create a four sequence for each player
+# 2. Giving value by sequences of three,
+# whether there is a three or continuous or non-continuous sequence (one free space)
+# in a way that adding one full position will be beatable.
+# In addition, priority is given to creating a consecutive sequence of three
+# so that victory can be achieved on both sides of the sequence.
 def totalEvaluate(s, actor):
+
+    # Internal function for single line evaluation
     def evaluate(_list, actor):
 
         # Parameters for potential
@@ -213,6 +232,8 @@ def totalEvaluate(s, actor):
                         sequence = continuousSequence
                 continuousSequence = 0
 
+        # The number of options to create a sequence is as many as the optional less than three.
+        # For example: |X|X|X|X| | | | or | |X|X|X|X| | | or | | |X|X|X|X| | or | | | |X|X|X|X| = 7 - 3 = 4
         if counter > 3:
             potential = counter - 3
             if sequence > 3:
@@ -221,6 +242,7 @@ def totalEvaluate(s, actor):
             potential = 0
         return potential + sequenceThree * valueOfSequenceThree
 
+    # Create 4 lists of all options to create sequences and then scan them by the internal function
     totalEval = 0
     listVerticals = vertical_func(s)
     listHypotenuse1 = hypotenuse1_func(s)
